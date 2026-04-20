@@ -26,6 +26,7 @@ _here = Path(__file__).resolve().parent
 if str(_here) not in sys.path:
     sys.path.insert(0, str(_here))
 
+import bottlenecks as bottleneck_mod  # type: ignore
 import config_inspector  # type: ignore
 import cost_model  # type: ignore
 import ensure_ccusage  # type: ignore
@@ -96,11 +97,19 @@ def run_audit(days: int = 7) -> dict:
     total_weekly_savings = sum(l.est_weekly_savings_usd for l in all_leaks)
     savings_as_plan_share = cost_model.plan_savings_summary(total_weekly_savings, "max20x")
 
+    # 8. Bottleneck analysis — where to look first.
+    bns = bottleneck_mod.compute_bottlenecks(sessions, config, top_n=3)
+    bottlenecks_out = {
+        kind: [_bottleneck_to_dict(b) for b in bns_list]
+        for kind, bns_list in bns.items()
+    }
+
     return {
         "summary": summary,
         "ccusage": ccusage_data,
         "ccusage_error": ccusage_error,
         "detector_errors": detector_errors,
+        "bottlenecks": bottlenecks_out,
         "leaks": [_leak_to_dict(l) for l in all_leaks],
         "total_weekly_savings_usd": round(total_weekly_savings, 2),
         "savings_share_of_plan": savings_as_plan_share,
@@ -108,15 +117,36 @@ def run_audit(days: int = 7) -> dict:
     }
 
 
+def _bottleneck_to_dict(b) -> dict:
+    return {
+        "kind": b.kind,
+        "label": b.label,
+        "id": b.id,
+        "est_weekly_cost_usd": round(b.est_weekly_cost_usd, 2),
+        "est_weekly_tokens": b.est_weekly_tokens,
+        "share_of_total_pct": b.share_of_total_pct,
+        "contributing_categories": b.contributing_categories,
+        "evidence": b.evidence,
+        "fix_action": b.fix_action,
+    }
+
+
 def _run_ccusage(days: int) -> tuple[dict | None, str | None]:
-    """Run `ccusage daily --since <N days ago> --json`. Best-effort."""
+    """Run `ccusage daily --since=YYYYMMDD --until=YYYYMMDD --json`.
+
+    Scope tightly by `--until` as well so users with months of history don't
+    time out. Uses a generous timeout but still best-effort — if it fails,
+    the audit continues without it and the report notes the absence.
+    """
     from datetime import datetime, timedelta, timezone
-    since = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y%m%d")
+    now = datetime.now(timezone.utc)
+    since = (now - timedelta(days=days)).strftime("%Y%m%d")
+    until = now.strftime("%Y%m%d")
     rc, out, err = ensure_ccusage.run_ccusage(
-        ["daily", f"--since={since}", "--json"], timeout=120
+        ["daily", f"--since={since}", f"--until={until}", "--json"], timeout=180
     )
     if rc != 0:
-        return None, err.strip() or "ccusage failed"
+        return None, (err.strip() or "ccusage failed") + f" (try: npx ccusage@latest daily --since={since})"
     try:
         return json.loads(out), None
     except json.JSONDecodeError as e:

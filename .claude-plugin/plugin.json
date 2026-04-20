@@ -1,0 +1,16 @@
+{
+  "name": "token-audit",
+  "description": "Find where your Claude Code tokens are leaking. Local-only audit, nine detectors ranked by impact, cites Anthropic's Claude Code team.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Bayram Annakov",
+    "email": "bayram@onsa.ai"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BayramAnnakov/token-audit-skill.git"
+  },
+  "homepage": "https://github.com/BayramAnnakov/token-audit-skill",
+  "keywords": ["claude-code", "token", "usage", "audit", "cost", "optimization", "ccusage", "productivity"]
+}

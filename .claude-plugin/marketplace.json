@@ -1,0 +1,13 @@
+{
+  "name": "token-audit-skill",
+  "owner": {
+    "name": "Bayram Annakov"
+  },
+  "plugins": [
+    {
+      "name": "token-audit",
+      "source": "./",
+      "description": "Local audit of Claude Code token usage. Nine detectors (Opus-on-simple, context rot, CLAUDE.md bloat, hook bloat, skill-description overhead, Bash anti-patterns, tool-schema dumping, cache churn, redundant reads). Ranked by impact with fix actions. Cites Anthropic's Claude Code team."
+    }
+  ]
+}

@@ -72,14 +72,32 @@ Outputs JSON to stdout. You (Claude) then synthesize a narrative report in the u
 
 If ccusage is unavailable, the audit proceeds without baseline $ totals — detectors still work from JSONLs alone.
 
-## Estimated savings — how to frame them
+## How to frame savings — READ THIS
 
-The `$ saved per week` numbers are **ballparks**, not invoices. They assume:
-- List Anthropic pricing (not your actual plan's effective rate)
-- Conservative fix recovery (usually 40-70% of measured waste)
-- Dominant-model heuristic for costing (takes your most-used model)
+Most users are on a flat-rate subscription (Pro $20 / Max 5x $100 / Max 20x $200). Reporting "saves $2,200/week" when they pay $200 flat is misleading — they won't "save" that from their pocket. What they actually gain:
 
-For authoritative spend, cross-reference with `ccusage daily`. Our job is to rank fixes by impact and point you at the biggest one, not bill you.
+1. **Headroom before hitting weekly rate limits** (the real pain for Max users)
+2. **Better model quality** (less context rot, fewer cache-miss penalties)
+3. **Capacity for more projects on the same plan**
+4. **If API user: actual dollar savings**
+
+**Narration rules when writing the report:**
+
+- **Lead with tokens reclaimed per week**, not dollars. "~3.9B tokens/week reclaimable" is honest.
+- **Frame as category reduction**: "~80% reduction in Opus spend on this category". Percentages ground the claim in the leak itself.
+- **Mention plan capacity** when helpful: "≈ 15% of your Max 20x weekly Opus allowance". Ask the user for their plan only if they haven't said; otherwise don't guess.
+- **Put dollar figures in parentheses as context, not the headline**: "(≈ $6,800/week at Anthropic API list pricing — reference only; your subscription is flat-fee)".
+- **For the total line at the bottom, use "capacity reclaimable" not "savings"**. If user hits rate limits, optionally add: "this could let you stay on your current plan instead of buying a second subscription".
+- **API users are the exception** — for them, dollar savings are direct. If you know they're API-direct, lead with $.
+
+Detectors compute all of:
+- `est_weekly_tokens` — honest, plan-neutral primary metric
+- `est_weekly_cost_usd` — at API list pricing
+- `est_weekly_savings_usd` — what the fix would eliminate (at list pricing)
+
+Plan limits are published in `scripts/cost_model.py` (Pro/Max5x/Max20x ranges). Use `plan_savings_summary(amount, plan)` helper to generate the "≈ X% of subscription-week" phrasing.
+
+**Why we still compute dollars internally:** for ranking. Dollar impact is the cleanest way to prioritize leaks across heterogeneous categories.
 
 ## What the skill does NOT do
 

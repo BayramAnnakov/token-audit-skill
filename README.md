@@ -26,25 +26,34 @@ Each detection comes with a **ballpark weekly $ saving** so you can prioritize. 
 
 ## Install
 
-### Option A: as a Claude Code skill (recommended)
+### Option A: Claude Code plugin (recommended)
 
-Clone into your skills directory:
-
-```bash
-git clone https://github.com/BayramAnnakov/token-audit-skill ~/.claude/skills/token-audit
+In Claude Code:
+```
+/plugin marketplace add BayramAnnakov/token-audit-skill
+/plugin install token-audit@token-audit-skill
 ```
 
-Then invoke in Claude Code:
+Then:
 ```
 /token-audit
 ```
 
-### Option B: run the CLI directly
+### Option B: drop-in skill (no plugin system)
+
+```bash
+git clone https://github.com/BayramAnnakov/token-audit-skill
+cp -r token-audit-skill/skills/token-audit ~/.claude/skills/
+```
+
+Invoke in Claude Code with `/token-audit`.
+
+### Option C: run the CLI directly
 
 ```bash
 git clone https://github.com/BayramAnnakov/token-audit-skill
 cd token-audit-skill
-python3 scripts/audit.py --days 7
+python3 skills/token-audit/scripts/audit.py --days 7
 ```
 
 Outputs a JSON report.
