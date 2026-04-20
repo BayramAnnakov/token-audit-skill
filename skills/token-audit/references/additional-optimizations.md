@@ -58,25 +58,63 @@ These are not auto-detectors (they're too contextual). Consider each for every a
 
 **Priority:** always check when ccusage shows a jump ≥ 2× weekly average, or when `recurring_scripts` detector surfaces anything.
 
-### 4. Ollama / local models for hook + scheduled work
+### 4. Run Claude Code itself on open-source models via Ollama
 
-**Why:** Background analysis that runs unattended (log summarization, daily digest generation, lead enrichment) often doesn't need frontier-model quality. An Ollama-served local model (Llama, Mistral, Qwen) can handle 90% of these jobs at zero token cost against the subscription.
+**Why:** This is bigger than "offload some tasks to Ollama." Ollama's Anthropic-compatible API lets you run the **entire Claude Code CLI** — same tools, same skills, same plugins — backed by open-source models instead of Anthropic's. Zero draw on your subscription.
 
-**Check:** does the user have hooks or scheduled jobs using `claude -p` for tasks that don't need Opus?
+Source: https://docs.ollama.com/integrations/claude-code
 
-**Suggest:** route low-stakes recurring work through a local model. Reserve Claude subscription for interactive and high-stakes work.
+**The command:**
+```bash
+ollama launch claude --model qwen3.5:cloud
+# or, for specific models:
+ollama launch claude --model kimi-k2.5:cloud
+ollama launch claude --model glm-5:cloud
+ollama launch claude --model minimax-m2.7:cloud
+```
 
-**Priority:** medium for developers comfortable with Ollama; low otherwise.
+Cloud models work without a local GPU. Local models (`qwen3.5`, `glm-4.7-flash`) also work if you have the hardware.
+
+**Headless mode** (for cron / scripts):
+```bash
+ollama launch claude --model kimi-k2.5:cloud --yes -- -p "summarize today's metrics from <file>"
+```
+
+**Check:** does the user have cron jobs, hooks, or scheduled skills using `claude -p` that don't actually need Opus? Specifically:
+- Morning briefings / digest generation
+- Log summarization
+- Email/lead triage
+- Any deterministic formatting or classification work
+- Overnight batch jobs
+
+**Suggest:** keep interactive / high-stakes work on Anthropic-backed Claude Code. Route cron + automation + low-stakes agents to `ollama launch claude --model qwen3.5:cloud` or similar. Same skills, same workflow, different engine.
+
+**Quality caveat:** open-source frontier has closed the gap (~3 months behind Anthropic per recent measurements), but it's still a gap. Don't route code review, deep reasoning, or customer-facing work to OS models until you've sanity-checked quality on YOUR tasks.
+
+**Priority:** high for users with heavy automation load against their weekly cap. A morning autopilot running daily on `qwen3.5:cloud` frees up the equivalent Opus allowance for interactive work.
 
 ### 5. Prompt-caching strategy mismatch
 
-**Why:** Claude's cache has a 5-minute default TTL (1-hour premium). If the user opens a session, works for 20 minutes, goes for coffee for 10 minutes, comes back — cache is dead, next prompt pays full cache-write. Happens ~several times a day for many users.
+**Why:** Anthropic's prompt cache defaults to a **5-minute lifetime**. A 1-hour lifetime exists but requires explicit opt-in via `cache_control: {"type": "ephemeral", "ttl": "1h"}` in the API, and costs 2× base input tokens on write (vs 1.25× for 5-min). Cache reads are 0.1× base input tokens either way.
 
-**Check:** audit the user's `cache_hit_ratio` per session (already in data). Ask about their workflow — do they take breaks mid-session?
+Source: https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching
 
-**Suggest:** for sustained work, stay engaged or start a new session after breaks rather than resuming stale ones. Or upgrade to premium 1-hour cache if it's clearly worth it.
+So: if the user opens a session, works for 20 minutes, takes a 10-minute coffee break, comes back — cache is dead, next prompt pays full cache-write on the entire system prompt + CLAUDE.md + history.
 
-**Priority:** medium for users with cache-hit ratios in the 40-60% range (there's a lot of recoverable waste there).
+**Check:** the cache detector (`cache.py`) fires when a session's cache-hit ratio is < 50%. If that fired, this is actionable.
+
+**Suggest (for subscription users — Pro/Max):**
+- You can't directly set TTL; Claude Code uses whatever Anthropic ships. The strategy is **behavioral**:
+  - Stay engaged during focused work (don't let the 5-min window lapse mid-session)
+  - After breaks > 5 min, `/clear` and restart rather than resuming stale sessions (you pay the write either way; restarting is at least clean)
+  - Don't edit CLAUDE.md mid-session — it invalidates the prefix cache for the remainder of that session. Edit → commit → start new session.
+
+**Suggest (for API-direct users):**
+- Explicitly set `"ttl": "1h"` on high-value prompts where breaks are expected
+- Math: 1-hour TTL is worth it if you make ≥ 2 requests against the same prefix per hour
+- Verify with actual usage metrics — don't guess
+
+**Priority:** medium for users with cache-hit ratios in the 40-60% range (substantial recoverable waste).
 
 ### 6. Desktop / web client blindness
 
