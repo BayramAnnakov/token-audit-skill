@@ -146,6 +146,53 @@ So: if the user opens a session, works for 20 minutes, takes a 10-minute coffee 
 
 **Priority:** medium — hard to detect automatically, worth asking the user about.
 
+### 9. Ollama routing for automation-heavy workloads
+
+**Why:** per seed #4, `ollama launch claude --model qwen3.5:cloud` runs the full Claude Code CLI backed by open-source models with zero Anthropic draw. The question per workload: **does this task actually need frontier quality?** If no → route it to Ollama and reclaim the equivalent Anthropic capacity for the work that does.
+
+**This is the FOLLOW-THROUGH for seed #4.** Seed #4 is "Ollama exists and wraps Claude Code." This seed is "for YOUR specific workloads, here's how to decide what to route."
+
+**Signals that a workload is a good Ollama candidate:**
+- ✅ Flagged by `recurring_scripts` detector (cron-like cadence)
+- ✅ Project where the bottleneck analyzer shows high automation share
+- ✅ Deterministic output — formatting, classification, summarization, CSV/JSON shaping
+- ✅ Non-interactive — runs unattended, user reviews output later
+- ✅ Low-stakes — failure mode is "regenerate" not "ship bad code to prod"
+- ✅ User has expressed quality ambivalence ("this doesn't need to be perfect")
+
+**Signals a workload should STAY on Anthropic:**
+- ❌ Interactive coding / pair programming
+- ❌ Customer-facing content drafting (emails, docs)
+- ❌ Code review, security audit, architecture decisions
+- ❌ Work that uses Claude's specific tool-use patterns heavily (Read/Edit/Task orchestration matters)
+- ❌ User has explicitly said they need frontier quality
+
+**Heuristic: the "would I be okay with this regenerating?" test.** If the worst-case failure is "I notice the output is off and re-run it," Ollama is fine. If the worst-case failure is "this shipped before I noticed," stay on Anthropic.
+
+**Implementation path:**
+
+1. Identify the candidate: pick ONE automation (morning briefing, log summarizer, lead enricher)
+2. Clone the script/skill that invokes it
+3. Change the invocation:
+   ```bash
+   # before:
+   claude -p "summarize today's metrics from <file>"
+   # after:
+   ollama launch claude --model qwen3.5:cloud --yes -- -p "summarize today's metrics from <file>"
+   ```
+4. Run both in parallel for a week (A/B the output quality)
+5. If Ollama output is acceptable → cut over. If not → try `kimi-k2.5:cloud` or `glm-5:cloud` (stronger cloud models) before giving up.
+
+**For the audit narrator:** when a user has cron/automation load, include this suggestion with a specific candidate from their actual profile:
+
+```markdown
+- [Ollama routing] Your `<project>` has <N> sessions/day with cron-like cadence (see recurring_scripts finding above). This is a prime Ollama candidate — same skills, same workflow:
+  `ollama launch claude --model qwen3.5:cloud --yes -- -p "..."`
+  Test in parallel for a week; cut over if quality holds.
+```
+
+**Priority:** high when `recurring_scripts` fires; medium when bottleneck analyzer shows an automation-heavy project; skip if the user only does interactive work.
+
 ## What to do with these ideas in the report
 
 At the end of the standard audit report, add a section:

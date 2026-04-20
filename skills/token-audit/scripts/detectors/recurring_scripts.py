@@ -132,10 +132,15 @@ def detect(sessions, config) -> list[Leak]:
             f"Audit scheduled jobs firing in `{project}`. "
             "Check: launchd / cron / scheduled tasks / GitHub Actions cron / "
             "anything using `claude -p` in a loop. "
-            "Kieran Klaassen hit 91% of his weekly sub by Monday because a 5-min cron "
-            "should have been daily. Fix: adjust the schedule to match intended cadence, "
-            "or disable entirely if it's obsolete. Use `ccusage daily --project <name>` "
-            "to confirm the drop after the fix."
+            "Three fix paths, in order of leverage: "
+            "(1) If the cadence is wrong (Kieran's case — 5-min cron that should be daily), "
+            "fix the schedule; "
+            "(2) If the job is obsolete, disable it; "
+            "(3) If the job is legitimate but doesn't need frontier quality, route it to "
+            "`ollama launch claude --model qwen3.5:cloud` — same Claude Code CLI, same skills, "
+            "zero draw on your Anthropic subscription. See additional-optimizations.md §4+§9 "
+            "for the Ollama routing evaluation. "
+            "Confirm the drop with `ccusage daily` after the fix."
         )
 
         leaks.append(Leak(
