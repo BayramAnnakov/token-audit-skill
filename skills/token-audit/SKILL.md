@@ -112,14 +112,19 @@ Plan limits are published in `scripts/cost_model.py` (Pro/Max5x/Max20x ranges). 
 2. Read the JSON output
 3. Present findings in the user's language as a tight report (see "Report structure" above)
 4. **After presenting**, offer to walk through fixes inline — no separate subcommand:
-   > "Want me to apply any of these? I can: (a) add the Sonnet default to `onsa-gtm/.claude/settings.json`, (b) trim the 8.9k-token CLAUDE.md, (c) enable `ENABLE_TOOL_SEARCH`. Pick any."
+   > "Want me to apply any of these? I can: (a) add the Sonnet default to `<project>/.claude/settings.json`, (b) trim the oversized CLAUDE.md, (c) enable `ENABLE_TOOL_SEARCH`. Pick any."
    - For each fix the user picks: show the exact diff, ask y/N, back up the file with a timestamped copy, then write.
    - Never modify settings.json, hooks, or CLAUDE.md without explicit per-fix confirmation.
-5. Re-run after 1-2 weeks to measure delta
+5. **If the user wants real-time prevention** (they ask "how do I stop this from happening again?"), propose user-specific hooks. See `references/hook-design.md` for principles and patterns. Critical rules:
+   - Consult the `claude-code-guide` agent or https://code.claude.com/en/docs/claude-code/hooks for the current hook API before writing any hook code — the spec changes, don't rely on memory
+   - Design hooks matched to THIS user's actual waste profile (project, thresholds, leak type), not generic one-size-fits-all hooks
+   - Informational at objective thresholds, never prescriptive on tool choice
+   - Always show the exact script + settings.json diff, per-hook y/N, kill-switch included
+6. Re-run after 1-2 weeks to measure delta
 
 ## Roadmap (v2+, not shipped)
 
-- **Sentinel hooks** — real-time in-session nudges (PreToolUse Bash guardrail, SessionStart contextual tip, PostToolUse context watchdog)
+- **User-specific hook designer** — guidance for Claude to propose hooks matched to the user's audit profile (principles already in `references/hook-design.md`; surface this in step 5 of the invocation pattern)
 - **Cross-assistant support**: Codex (`AGENTS.md`, reasoning_effort), Aider (`.aider.conf.yml`, map-tokens), Cursor (Auto vs API pool routing)
 - **More detectors**: extended-thinking budget runaway, agent-team 7x multiplier, `.claudeignore` absence, plan-mode underuse, stale-session resume, pasted-blob vs `@file` mentions
 - **Auto-weekly cron digest** (to Telegram or email)
