@@ -16,7 +16,7 @@ Canonical list of detectable token leaks, with examples and detection logic. Use
 
 **What it is:** Hooks that emit large content (briefings, inventories, CRM dumps) get injected into context on every session. If you open 5 sessions a day, a 22 KB hook briefing costs 110 KB of context daily.
 
-**Why it hurts:** Linear in session count. Bayram's morning briefing is a textbook case.
+**Why it hurts:** Linear in session count. Common culprits: SessionStart hooks that dump daily briefings, inventory snapshots, or CRM status on every session.
 
 **Detection:** Count `hook_success` attachments per `hookName` in JSONL. Weight by content size.
 

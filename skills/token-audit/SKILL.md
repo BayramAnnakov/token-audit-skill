@@ -111,16 +111,19 @@ Plan limits are published in `scripts/cost_model.py` (Pro/Max5x/Max20x ranges). 
 1. Run `audit.py --days 7`
 2. Read the JSON output
 3. Present findings in the user's language as a tight report (see "Report structure" above)
-4. If the user says "fix it" or "apply X" for a specific fix, guide them through it manually — do NOT edit their settings without explicit confirmation
+4. **After presenting**, offer to walk through fixes inline — no separate subcommand:
+   > "Want me to apply any of these? I can: (a) add the Sonnet default to `onsa-gtm/.claude/settings.json`, (b) trim the 8.9k-token CLAUDE.md, (c) enable `ENABLE_TOOL_SEARCH`. Pick any."
+   - For each fix the user picks: show the exact diff, ask y/N, back up the file with a timestamped copy, then write.
+   - Never modify settings.json, hooks, or CLAUDE.md without explicit per-fix confirmation.
 5. Re-run after 1-2 weeks to measure delta
 
 ## Roadmap (v2+, not shipped)
 
+- **Sentinel hooks** — real-time in-session nudges (PreToolUse Bash guardrail, SessionStart contextual tip, PostToolUse context watchdog)
 - **Cross-assistant support**: Codex (`AGENTS.md`, reasoning_effort), Aider (`.aider.conf.yml`, map-tokens), Cursor (Auto vs API pool routing)
-- **Auto-weekly cron digest** (to Telegram or email)
 - **More detectors**: extended-thinking budget runaway, agent-team 7x multiplier, `.claudeignore` absence, plan-mode underuse, stale-session resume, pasted-blob vs `@file` mentions
-- **Apply-fix mode**: safe settings.json edits with timestamped backup (currently report-only)
-- **Trend tracking**: store results over time, show week-over-week deltas
+- **Auto-weekly cron digest** (to Telegram or email)
+- **Trend tracking**: store audit results over time, show week-over-week deltas
 
 ## Authoritative references
 

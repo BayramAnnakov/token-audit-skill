@@ -83,8 +83,7 @@ def detect(sessions, config) -> list[Leak]:
     fix_action = (
         "Add a rule to `~/.claude/CLAUDE.md` under 'Tool preferences': "
         "\"Prefer Read over `cat`/`head`/`tail`. Prefer Glob over `find`. "
-        "Prefer Grep over `grep`/`rg`. Native tools stream ranged output; Bash pipes dump everything.\" "
-        "For Bayram's course: this is Samarth Gupta's #1 waste finding."
+        "Prefer Grep over `grep`/`rg`. Native tools stream ranged output; Bash pipes dump everything.\""
     )
 
     return [Leak(

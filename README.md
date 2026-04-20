@@ -69,37 +69,37 @@ If ccusage is unavailable, the audit proceeds without baseline spend totals; det
 ## Example output (abridged)
 
 ```
-Token Audit — 2026-04-19 (last 7 days)
+Token Audit — last 7 days
 
-Spend summary
-  Total:    $47 on ccusage daily
+Spend (ccusage)
+  Total:    $N at API list pricing (reference only — you're on a flat subscription)
   Models:   Opus 80% · Sonnet 19% · Haiku 1%
-  Peak day: Wed Apr 17 ($12.10)
 
-Top leaks (ranked by weekly savings)
+Top bottlenecks (where to look first)
 
-🔴 Opus used on 5,505 simple turns — ~$2,200/wk savings
-  • 5,505 Opus turns with <1k output tokens
-  • Current cost on Opus: $2,750  →  Sonnet: $550
-  • Fix: set default model to Sonnet; escalate to Opus only for planning
+🔴 Single session: <project>/<session-id>  →  ~27% of this week's waste
+  • 1,500+ turns past the 400k context-rot threshold, peak ~800k
+  • 2,000+ Opus turns with <1k output (Sonnet would suffice)
+  • FIX: compact proactively every ~2h with a scope hint
 
-🔴 1,646 turns past the context-rot threshold — ~$765/wk savings
-  Thariq (Anthropic): "Due to context rot, the model is at its
-  least intelligent point when compacting." Compact PROACTIVELY.
+🔴 Project: <project>  →  ~48% of this week's waste
+  • Add `"model": "claude-sonnet-4"` to this project's .claude/settings.json
+  • Escalate to Opus only for planning / hard reasoning
 
-🔴 CLAUDE.md bloat: 5 oversized files, worst ~8.9k tok — ~$282/wk savings
-  • ~/GH/bayram-os/CLAUDE.md: 8.9k tok (35k bytes)
-  • Target: <2k tokens (Anthropic's 200-line recommendation)
+🔴 File: <project>/CLAUDE.md  →  19% of this week's waste
+  • ~9k tokens, paid on every turn. Target: ≤2k (Anthropic's 200-line recommendation)
+  • Move command recipes and playbooks into @-referenced files
 
-🟡 Skill descriptions total 8.9k tok (per-turn tax) — ~$168/wk savings
-🟡 401 Bash calls that should use native tools — ~$3.21/wk savings
-🟢 Redundant Read on 33 file paths — ~$0.49/wk savings
+Top category leaks
 
-One fix this week: Set project default model to Sonnet.
-Estimated total weekly savings: ~$3,418 (≈ 68× one Max20x subscription-week).
+🟡 Skill descriptions total ~9k tok (per-turn tax)
+🟡 Hundreds of Bash calls using cat/head/find/grep where native tools exist
+🟢 Same file Read 3+ times in several sessions (rewind candidate)
+
+One fix this week: add Sonnet default to the top project's settings.json.
 ```
 
-(Ballpark numbers. Cross-reference with `ccusage daily` for authoritative spend.)
+Numbers in the example are illustrative. Your report uses your real data from `~/.claude/projects/` and `ccusage`.
 
 ## Privacy
 

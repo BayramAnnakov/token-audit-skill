@@ -156,12 +156,13 @@ def plan_savings_summary(weekly_savings_usd: float, plan: str = "max20x") -> str
 
 
 if __name__ == "__main__":
+    # Smoke tests — synthetic numbers, not tied to any real user.
     cost = estimate_context_cost(200_000, "claude-opus-4-6", cache_hit_ratio=0.7)
     print(f"200k-tok Opus turn @ 70% cache hit: {format_dollars(cost)}")
-    big_cost = estimate_cost(
-        TokenBreakdown(cache_read_tokens=5_000_000_000, cache_write_tokens=500_000_000,
-                       input_tokens=10_000_000, output_tokens=5_000_000),
+    weekly = estimate_cost(
+        TokenBreakdown(cache_read_tokens=500_000_000, cache_write_tokens=50_000_000,
+                       input_tokens=1_000_000, output_tokens=500_000),
         "claude-opus-4-6",
     )
-    print(f"~5.5B tok weighted: {format_dollars(big_cost)}")
+    print(f"Sample weekly usage: {format_dollars(weekly)}")
     print(f"$10/wk saved vs Max20x: {plan_savings_summary(10, 'max20x')}")
