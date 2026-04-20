@@ -7,10 +7,7 @@
     "email": "bayram@onsa.ai"
   },
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/BayramAnnakov/token-audit-skill.git"
-  },
+  "repository": "https://github.com/BayramAnnakov/token-audit-skill",
   "homepage": "https://github.com/BayramAnnakov/token-audit-skill",
   "keywords": ["claude-code", "token", "usage", "audit", "cost", "optimization", "ccusage", "productivity"]
 }
