@@ -40,6 +40,7 @@ DETECTOR_MODULES = [
     "detectors.claude_md_bloat",
     "detectors.model_selection",
     "detectors.context",
+    "detectors.recurring_scripts",
     "detectors.skill_descriptions",
     "detectors.bash_antipatterns",
     "detectors.cache",

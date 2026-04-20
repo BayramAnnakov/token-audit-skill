@@ -41,12 +41,14 @@ Outputs JSON to stdout. You (Claude) then synthesize a narrative report in the u
 ### Report structure (adapt tone, keep sections)
 
 1. **Spend summary** — total, by model, by project, trend vs prior week (from ccusage)
-2. **Top leaks ranked by weekly savings** — each with:
+2. **Top bottlenecks** — session / project / file Pareto view: where to look FIRST
+3. **Top leaks ranked by weekly savings** — each with:
    - Severity badge (🔴 critical / 🟡 warning / 🟢 suggestion)
    - Evidence (3-5 bullets with numbers)
    - Estimated weekly cost + savings
    - Concrete fix action
    - Thariq citation where applicable
+4. **Other ideas worth considering** — 1-3 user-specific suggestions **you (Claude) brainstorm** based on the user's profile. The canned detectors catch patterns that generalize; this section catches patterns unique to this user. Read `references/additional-optimizations.md` for seeds (language efficiency, off-peak shifting, runaway cron check, local-model offloading, cache-TTL strategy, desktop-client blindness, skill pruning) and the brainstorming pattern. Curate 1-3 that actually apply to THIS user — don't list them all. If nothing fits, skip the section entirely.
 3. **One fix to apply this week** — single highest-leverage action
 4. **Trend / context** — plan-fee share, savings as % of subscription week
 
